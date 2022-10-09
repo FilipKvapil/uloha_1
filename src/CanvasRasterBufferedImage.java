@@ -48,7 +48,7 @@ public class CanvasRasterBufferedImage {
 		panel.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
-				int size = 2;
+				/*int size = 2;
 				int color  = 0xFFFFFF;
 				if (e.getButton() == MouseEvent.BUTTON1)
 					color = 0xff0000;
@@ -56,7 +56,7 @@ public class CanvasRasterBufferedImage {
 					color = 0xff00;
 				for(int i=-size; i<=size; i++)
 					for(int j=-size; j<=size; j++)
-						raster.setPixel(e.getX()+i, e.getY()+j, color);
+						raster.setPixel(e.getX()+i, e.getY()+j, color);*/
 				if (e.getButton() == MouseEvent.BUTTON3) {
 					rasterizer.drawLine(x,y,e.getX(),e.getY());
 					x = e.getX();
@@ -66,15 +66,15 @@ public class CanvasRasterBufferedImage {
 			}
 		});
 
-		panel.addMouseMotionListener(new MouseMotionAdapter() {
+		/*panel.addMouseMotionListener(new MouseMotionAdapter() {
 			@Override
 			public void mouseMoved(MouseEvent e) {
 				raster.setPixel(e.getX(), e.getY(), 0xffff00);
 				panel.repaint();
 			}
-		});
+		});*/
 
-		panel.addComponentListener(new ComponentAdapter() {
+		/*panel.addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentResized(ComponentEvent e) {
 				if (panel.getWidth()<1 || panel.getHeight()<1)
@@ -88,14 +88,13 @@ public class CanvasRasterBufferedImage {
 				rasterizer = new LineRasterizerGraphics(raster);
 
 			}
-		});
+		});*/
 
 	}
 
 	public void clear(int color) {
 		raster.setClearColor(color);
 		raster.clear();
-		
 	}
 
 	public void present(Graphics graphics) {
@@ -108,8 +107,6 @@ public class CanvasRasterBufferedImage {
 		panel.repaint();
 	}
 
-	public static void main(String[] args) {
-		SwingUtilities.invokeLater(() -> new CanvasRasterBufferedImage(800, 600).start());
-	}
+
 
 }
