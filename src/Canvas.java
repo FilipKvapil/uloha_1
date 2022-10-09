@@ -1,8 +1,11 @@
+import rasterize.RasterBufferedImage;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -18,9 +21,9 @@ import javax.swing.WindowConstants;
 
 public class Canvas {
 
-	private JFrame frame;
-	private JPanel panel;
-	private BufferedImage img;
+	private final JFrame frame;
+	private final JPanel panel;
+	private final RasterBufferedImage img;
 
 	public Canvas(int width, int height) {
 		frame = new JFrame();
@@ -30,9 +33,10 @@ public class Canvas {
 		frame.setResizable(false);
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-		img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+		img = new RasterBufferedImage(width, height);
 
 		panel = new JPanel() {
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -56,21 +60,20 @@ public class Canvas {
 	}
 
 	public void present(Graphics graphics) {
-		graphics.drawImage(img, 0, 0, null);
+		img.present(graphics);
 	}
 
 	public void draw() {
 		clear();
-		img.setRGB(10, 10, 0xffff00);
+		img.setPixel(10, 10, 0xffff00);
 	}
 
 	public void start() {
 		draw();
 		panel.repaint();
 	}
-
 	public static void main(String[] args) {
-		SwingUtilities.invokeLater(() -> new Canvas(800, 600).start());
+		SwingUtilities.invokeLater(() -> new CanvasMouse(800, 600).start());
 	}
 
 }

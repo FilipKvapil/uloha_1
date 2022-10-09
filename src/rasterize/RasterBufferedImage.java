@@ -31,6 +31,7 @@ public class RasterBufferedImage implements Raster {
         return img.getGraphics();
     }
 
+
     @Override
     public int getPixel(int x, int y) {
         return img.getRGB(x, y);
@@ -47,7 +48,6 @@ public class RasterBufferedImage implements Raster {
         g.setColor(new Color(color));
         g.clearRect(0, 0, img.getWidth() - 1, img.getHeight() - 1);
     }
-
     @Override
     public void setClearColor(int color) {
         this.color = color;
@@ -63,4 +63,7 @@ public class RasterBufferedImage implements Raster {
         return img.getHeight();
     }
 
+    public void present(Graphics g) {
+        g.drawImage(img, 0, 0, null);
+    }
 }

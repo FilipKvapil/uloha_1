@@ -30,7 +30,6 @@ public class Panel extends JPanel {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         raster.repaint(g);
-        // pro zájemce - co dělá observer - https://stackoverflow.com/a/1684476
     }
 
     public void resize(){
