@@ -1,23 +1,22 @@
-import rasterize.LineRasterizerGraphics;
-import rasterize.RasterBufferedImage;
+import model.Point;
+import model.Polygon;
+import rasterize.*;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.Serial;
+import java.util.Timer;
+import java.util.TimerTask;
 
-/**
- * trida pro kresleni na platno: vyuzita tridy RasterBufferedImage
- * 
- * @author PGRF FIM UHK
- * @version 2020
- */
 
 public class CanvasRasterBufferedImage {
 
-	private JPanel panel;
-	private RasterBufferedImage raster;
-	private int x,y;
-	private LineRasterizerGraphics rasterizer;
+	private final JPanel panel;
+	private final RasterBufferedImage raster;
+	private final FilledLineRasterizer lineRasterizer;
+	private final Polygon polygon;
+	private final PolygonRasterizer polygonRasterizer;
 
 	public CanvasRasterBufferedImage(int width, int height) {
 		JFrame frame = new JFrame();
@@ -29,8 +28,12 @@ public class CanvasRasterBufferedImage {
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
 		raster = new RasterBufferedImage(width, height);
-		rasterizer = new LineRasterizerGraphics(raster);
+		lineRasterizer = new FilledLineRasterizer(raster,raster.getImg());
+		polygonRasterizer = new PolygonRasterizer(lineRasterizer);
+		polygon = new Polygon();
+
 		panel = new JPanel() {
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -48,31 +51,39 @@ public class CanvasRasterBufferedImage {
 		panel.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
-				/*int size = 2;
-				int color  = 0xFFFFFF;
-				if (e.getButton() == MouseEvent.BUTTON1)
-					color = 0xff0000;
-				if (e.getButton() == MouseEvent.BUTTON2)
-					color = 0xff00;
-				for(int i=-size; i<=size; i++)
-					for(int j=-size; j<=size; j++)
-						raster.setPixel(e.getX()+i, e.getY()+j, color);*/
-				if (e.getButton() == MouseEvent.BUTTON3) {
-					rasterizer.drawLine(x,y,e.getX(),e.getY());
-					x = e.getX();
-					y = e.getY();
+				if (e.getButton() == MouseEvent.BUTTON1 && polygon.getCount() == 0)
+					polygon.addPoint(new Point(e.getX(), e.getY()));
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				if (e.getButton() == MouseEvent.BUTTON1) {
+					polygon.addPoint(new Point(e.getX(),e.getY()));
+					raster.clear();
+					polygonRasterizer.drawPolygon(polygon);
 				}
+				if (e.getButton() == MouseEvent.BUTTON1 && polygon.getCount() == 2){
+					raster.clear();
+					lineRasterizer.drawLine(polygon.getPoint(polygon.getCount()-2),new Point(e.getX(),e.getY()));
+					System.out.println("a");}
 				panel.repaint();
 			}
 		});
-
-		/*panel.addMouseMotionListener(new MouseMotionAdapter() {
+		panel.addMouseMotionListener(new MouseMotionAdapter() {
 			@Override
-			public void mouseMoved(MouseEvent e) {
-				raster.setPixel(e.getX(), e.getY(), 0xffff00);
+			public void mouseDragged(MouseEvent e) {
+				raster.clear();
+				if (polygon.getCount()==1){
+					lineRasterizer.drawLine(polygon.getPoint(polygon.getCount()-1),new Point(e.getX(),e.getY()));
+				} else {
+						Polygon polygon1 = new Polygon();
+						polygon1.setList(polygon.getList());
+						polygon1.addPoint(new Point(e.getX(),e.getY()));
+						polygonRasterizer.drawPolygon(polygon1);
+					}
 				panel.repaint();
 			}
-		});*/
+		});
 
 		/*panel.addComponentListener(new ComponentAdapter() {
 			@Override
@@ -85,7 +96,7 @@ public class CanvasRasterBufferedImage {
 
 				newRaster.draw(raster);
 				raster = newRaster;
-				rasterizer = new LineRasterizerGraphics(raster);
+				linerasterizer = new LineRasterizerGraphics(raster);
 
 			}
 		});*/
@@ -106,7 +117,5 @@ public class CanvasRasterBufferedImage {
 		raster.getGraphics().drawString("Use mouse buttons and try resize the window", 5, 15);
 		panel.repaint();
 	}
-
-
 
 }
