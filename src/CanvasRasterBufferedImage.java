@@ -1,13 +1,13 @@
 import model.Point;
 import model.Polygon;
+import model.Triangle;
 import rasterize.*;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.Serial;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
 
 public class CanvasRasterBufferedImage {
@@ -15,8 +15,10 @@ public class CanvasRasterBufferedImage {
 	private final JPanel panel;
 	private final RasterBufferedImage raster;
 	private final FilledLineRasterizer lineRasterizer;
-	private final Polygon polygon;
 	private final PolygonRasterizer polygonRasterizer;
+	private final Polygon polygon;
+	private final Polygon trianglePoints;
+	private boolean TPress =false	;
 
 	public CanvasRasterBufferedImage(int width, int height) {
 		JFrame frame = new JFrame();
@@ -31,8 +33,8 @@ public class CanvasRasterBufferedImage {
 		lineRasterizer = new FilledLineRasterizer(raster,raster.getImg());
 		polygonRasterizer = new PolygonRasterizer(lineRasterizer);
 		polygon = new Polygon();
-
-		panel = new JPanel() {
+		trianglePoints = new Polygon();
+				panel = new JPanel() {
 			@Serial
 			private static final long serialVersionUID = 1L;
 
@@ -48,6 +50,9 @@ public class CanvasRasterBufferedImage {
 		frame.pack();
 		frame.setVisible(true);
 
+		panel.requestFocus();
+		panel.requestFocusInWindow();
+
 		panel.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
@@ -57,33 +62,67 @@ public class CanvasRasterBufferedImage {
 
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				if (e.getButton() == MouseEvent.BUTTON1) {
-					polygon.addPoint(new Point(e.getX(),e.getY()));
-					raster.clear();
-					polygonRasterizer.drawPolygon(polygon);
+
+				if(TPress && e.getButton() == MouseEvent.BUTTON1 && (trianglePoints.getCount() == 0 || trianglePoints.getCount() == 1)){
+					trianglePoints.addPoint(new Point(e.getX(), e.getY()));
+					if(trianglePoints.getCount() == 2){
+						lineRasterizer.drawLine(trianglePoints.getPoint(0),new Point(e.getX(),e.getY()));
+						panel.repaint();}
 				}
-				if (e.getButton() == MouseEvent.BUTTON1 && polygon.getCount() == 2){
-					raster.clear();
-					lineRasterizer.drawLine(polygon.getPoint(polygon.getCount()-2),new Point(e.getX(),e.getY()));
-					System.out.println("a");}
-				panel.repaint();
+					if (e.getButton() == MouseEvent.BUTTON1 && !TPress) {
+						polygon.addPoint(new Point(e.getX(),e.getY()));
+						raster.clear();
+						polygonRasterizer.drawPolygon(polygon);
+						if (polygon.getCount() == 2){
+							raster.clear();
+							lineRasterizer.drawLine(polygon.getPoint(polygon.getCount()-2),new Point(e.getX(),e.getY()));}
+						panel.repaint();
+					}
 			}
 		});
 		panel.addMouseMotionListener(new MouseMotionAdapter() {
 			@Override
 			public void mouseDragged(MouseEvent e) {
-				raster.clear();
-				if (polygon.getCount()==1){
-					lineRasterizer.drawLine(polygon.getPoint(polygon.getCount()-1),new Point(e.getX(),e.getY()));
-				} else {
-						Polygon polygon1 = new Polygon();
-						polygon1.setList(polygon.getList());
-						polygon1.addPoint(new Point(e.getX(),e.getY()));
-						polygonRasterizer.drawPolygon(polygon1);
+
+					if(TPress && trianglePoints.getCount() <= 3){
+							raster.clear();
+							lineRasterizer.drawLine(trianglePoints.getPoint(0),trianglePoints.getPoint(1));
+							Point point = new Triangle(trianglePoints.getPoint(0),trianglePoints.getPoint(1),new Point(e.getX(),e.getY())).getPoint();
+							lineRasterizer.drawLine(trianglePoints.getPoint(1),point);
+							lineRasterizer.drawLine(point,trianglePoints.getPoint(0));
+						panel.repaint();
+					}else{
+						if (polygon.getCount()==1){
+								raster.clear();
+								lineRasterizer.drawInterLine(polygon.getPoint(0),new Point(e.getX(),e.getY()));
+							} else {
+								raster.clear();
+								Polygon polygon1 = new Polygon();
+								polygon1.setList(polygon.getList());
+								polygon1.addPoint(new Point(e.getX(),e.getY()));
+								polygonRasterizer.drawPolygon(polygon1);
+								}
+						panel.repaint();
 					}
-				panel.repaint();
 			}
 		});
+
+		panel.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				switch (e.getKeyCode()) {
+					case KeyEvent.VK_T -> {
+						TPress = !TPress;
+						clear();
+					}
+					case KeyEvent.VK_C -> clear();
+					default -> {
+					}
+				}
+
+			}
+		});
+
 
 		/*panel.addComponentListener(new ComponentAdapter() {
 			@Override
@@ -102,19 +141,13 @@ public class CanvasRasterBufferedImage {
 		});*/
 
 	}
-
-	public void clear(int color) {
-		raster.setClearColor(color);
-		raster.clear();
-	}
-
 	public void present(Graphics graphics) {
 		raster.repaint(graphics);
 	}
-
-	public void start() {
-		clear(0xaaaaaa);
-		raster.getGraphics().drawString("Use mouse buttons and try resize the window", 5, 15);
+	public void clear (){
+		raster.clear();
+		polygon.clear();
+		trianglePoints.clear();
 		panel.repaint();
 	}
 
