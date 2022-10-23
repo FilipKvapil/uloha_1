@@ -2,7 +2,6 @@ package rasterize;
 
 import model.Point;
 import model.Polygon;
-import org.jetbrains.annotations.NotNull;
 
 public class PolygonRasterizer {
 
@@ -11,7 +10,7 @@ public class PolygonRasterizer {
         this.filledLineRasterizer = filledLineRasterizer;
     }
 
-    public void drawPolygon(@NotNull Polygon polygon){
+    public void drawPolygon(Polygon polygon){
 
         if(polygon.getCount() < 3)
             return;

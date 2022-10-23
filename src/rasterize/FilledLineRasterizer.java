@@ -1,7 +1,6 @@
 package rasterize;
 
 import model.Point;
-import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -21,7 +20,7 @@ public class FilledLineRasterizer extends LineRasterizer{
     *Výhoda: postup použitelný i pro složitější křivky
     * */
 
-    public void drawLine(@NotNull Point p1, @NotNull Point p2) {
+    public void drawLine(Point p1, Point p2) {
 
         float x1 = p1.getX();
         float y1 = p1.getY();
@@ -70,7 +69,7 @@ public class FilledLineRasterizer extends LineRasterizer{
         }
     }
     //algoritmus pro vykreslení tečkované čáty
-    public void drawInterLine(@NotNull Point p1, @NotNull Point p2) {
+    public void drawInterLine(Point p1, Point p2) {
 
         float x1 = p1.getX();
         float y1 = p1.getY();
