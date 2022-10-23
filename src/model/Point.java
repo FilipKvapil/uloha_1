@@ -11,12 +11,6 @@ public class Point {
         this.color = 0xFFFF0000 ;
     }
 
-    public Point(int x, int y,int color) {
-        this.x = x;
-        this.y = y;
-        this.color = color ;
-    }
-
     public int getX() {
         return x;
     }
@@ -25,7 +19,4 @@ public class Point {
         return y;
     }
 
-    public int getColor() {
-        return color;
-    }
 }
