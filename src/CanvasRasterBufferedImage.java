@@ -19,13 +19,14 @@ public class CanvasRasterBufferedImage {
 	private final Polygon polygon;
 	private final Polygon trianglePoints;
 	private boolean TPress =false	;
+	String mode = "Rectangle";
 
 	public CanvasRasterBufferedImage(int width, int height) {
 		JFrame frame = new JFrame();
 
 		frame.setLayout(new BorderLayout());
 
-		frame.setTitle("UHK FIM PGRF : " + this.getClass().getName());
+		frame.setTitle("Filip Kvapil - Uloha 1" );
 		frame.setResizable(true);
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
@@ -52,7 +53,7 @@ public class CanvasRasterBufferedImage {
 
 		panel.requestFocus();
 		panel.requestFocusInWindow();
-
+		clear();
 		panel.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
@@ -66,8 +67,10 @@ public class CanvasRasterBufferedImage {
 				if(TPress && e.getButton() == MouseEvent.BUTTON1 && (trianglePoints.getCount() == 0 || trianglePoints.getCount() == 1)){
 					trianglePoints.addPoint(new Point(e.getX(), e.getY()));
 					if(trianglePoints.getCount() == 2){
-						lineRasterizer.drawLine(trianglePoints.getPoint(0),new Point(e.getX(),e.getY()));
-						panel.repaint();}
+						lineRasterizer.setColor(Color.BLUE.getRGB());
+						lineRasterizer.drawInterLine(trianglePoints.getPoint(0),new Point(e.getX(),e.getY()));
+						lineRasterizer.setColor(Color.RED.getRGB());
+						repaint();}
 				}
 					if (e.getButton() == MouseEvent.BUTTON1 && !TPress) {
 						polygon.addPoint(new Point(e.getX(),e.getY()));
@@ -76,7 +79,7 @@ public class CanvasRasterBufferedImage {
 						if (polygon.getCount() == 2){
 							raster.clear();
 							lineRasterizer.drawLine(polygon.getPoint(polygon.getCount()-2),new Point(e.getX(),e.getY()));}
-						panel.repaint();
+						repaint();
 					}
 			}
 		});
@@ -86,23 +89,27 @@ public class CanvasRasterBufferedImage {
 
 					if(TPress && trianglePoints.getCount() <= 3){
 							raster.clear();
-							lineRasterizer.drawLine(trianglePoints.getPoint(0),trianglePoints.getPoint(1));
+							lineRasterizer.setColor(Color.BLUE.getRGB());
+							lineRasterizer.drawInterLine(trianglePoints.getPoint(0),trianglePoints.getPoint(1));
 							Point point = new Triangle(trianglePoints.getPoint(0),trianglePoints.getPoint(1),new Point(e.getX(),e.getY())).getPoint();
-							lineRasterizer.drawLine(trianglePoints.getPoint(1),point);
-							lineRasterizer.drawLine(point,trianglePoints.getPoint(0));
-						panel.repaint();
+							lineRasterizer.drawInterLine(trianglePoints.getPoint(1),point);
+							lineRasterizer.drawInterLine(point,trianglePoints.getPoint(0));
+							lineRasterizer.setColor(Color.RED.getRGB());
+						repaint();
 					}else{
 						if (polygon.getCount()==1){
 								raster.clear();
-								lineRasterizer.drawInterLine(polygon.getPoint(0),new Point(e.getX(),e.getY()));
+								lineRasterizer.drawLine(polygon.getPoint(0),new Point(e.getX(),e.getY()));
+							repaint();
 							} else {
 								raster.clear();
 								Polygon polygon1 = new Polygon();
 								polygon1.setList(polygon.getList());
 								polygon1.addPoint(new Point(e.getX(),e.getY()));
 								polygonRasterizer.drawPolygon(polygon1);
+							repaint();
 								}
-						panel.repaint();
+
 					}
 			}
 		});
@@ -113,6 +120,12 @@ public class CanvasRasterBufferedImage {
 				switch (e.getKeyCode()) {
 					case KeyEvent.VK_T -> {
 						TPress = !TPress;
+						mode = "Triangle";
+						clear();
+					}
+					case KeyEvent.VK_R ->{
+						TPress = !TPress;
+						mode = "Rectangle";
 						clear();
 					}
 					case KeyEvent.VK_C -> clear();
@@ -123,23 +136,6 @@ public class CanvasRasterBufferedImage {
 			}
 		});
 
-
-		/*panel.addComponentListener(new ComponentAdapter() {
-			@Override
-			public void componentResized(ComponentEvent e) {
-				if (panel.getWidth()<1 || panel.getHeight()<1)
-					return;
-				if (panel.getWidth()<=raster.getWidth() && panel.getHeight()<=raster.getHeight()) //no resize if new one is smaller
-					return;
-				RasterBufferedImage newRaster = new RasterBufferedImage(panel.getWidth(), panel.getHeight());
-
-				newRaster.draw(raster);
-				raster = newRaster;
-				linerasterizer = new LineRasterizerGraphics(raster);
-
-			}
-		});*/
-
 	}
 	public void present(Graphics graphics) {
 		raster.repaint(graphics);
@@ -148,7 +144,36 @@ public class CanvasRasterBufferedImage {
 		raster.clear();
 		polygon.clear();
 		trianglePoints.clear();
-		panel.repaint();
+		repaint();
 	}
 
+	public void repaint() {
+		panel.repaint();
+		raster.getImg().getGraphics().setColor(Color.white);
+			raster.getImg().getGraphics().drawString("Klávesa T - Triangle,Klávesa R - Rectangle, Klávesa C - Clear", 5, raster.getImg().getHeight() - 5);
+			raster.getImg().getGraphics().drawString("Aktuální režim : " + mode, 5,  15);
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
